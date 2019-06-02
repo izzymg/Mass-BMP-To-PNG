@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
 // makeProcessFunc creates a function that attempts to convert any BMP files it finds
@@ -86,6 +87,9 @@ func main() {
 	silent := flag.Bool("silent", false, "Don't print anything to stdout")
 	flag.Parse()
 
+	// Timing
+	start := time.Now()
+
 	// Trim
 	inputDir := trimPath(*inputDirFlag)
 	outputDir := trimPath(*outputDirFlag)
@@ -115,6 +119,6 @@ func main() {
 	wg.Wait()
 
 	if *silent == false {
-		fmt.Printf("Processed %d files\n", len(files))
+		fmt.Printf("Processed %d files in %.3fs\n", len(files), time.Since(start).Seconds())
 	}
 }
