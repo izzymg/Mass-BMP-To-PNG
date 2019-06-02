@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 // makeProcessFunc creates a function that attempts to convert any BMP files it finds
@@ -27,7 +28,7 @@ func makeProcessFunc(inputDirectory string, outputDirectory string, silent bool)
 		}
 
 		if silent == false {
-			fmt.Printf("Processing %s\n", fileInfo.Name())
+			fmt.Printf("Processing \"%s\"\n", fileInfo.Name())
 		}
 
 		// Open file
@@ -98,15 +99,22 @@ func main() {
 		panic(err)
 	}
 
-	processed := 0
+	var wg sync.WaitGroup
+	wg.Add(len(files))
+
 	for _, file := range files {
-		err := processFile(file)
-		if err != nil {
-			panic(err)
-		}
-		processed++
+		go func(f os.FileInfo) {
+			defer wg.Done()
+			err := processFile(f)
+			if err != nil {
+				panic(err)
+			}
+		}(file)
 	}
+
+	wg.Wait()
+
 	if *silent == false {
-		fmt.Printf("Processed %d images\n", processed)
+		fmt.Printf("Processed %d files\n", len(files))
 	}
 }
