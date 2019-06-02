@@ -14,8 +14,8 @@ import (
 )
 
 // makeProcessFunc creates a function that attempts to convert any BMP files it finds
-// into PNGs and write them into outputDirectory
-func makeProcessFunc(inputDirectory string, outputDirectory string, silent bool) func(fileInfo os.FileInfo) error {
+// into PNGs and write them into outputDir
+func makeProcessFunc(inputDir string, outputDir string, silent bool, clean bool) func(fileInfo os.FileInfo) error {
 	return func(fileInfo os.FileInfo) error {
 
 		// Skip directories
@@ -32,10 +32,16 @@ func makeProcessFunc(inputDirectory string, outputDirectory string, silent bool)
 			fmt.Printf("Processing \"%s\"\n", fileInfo.Name())
 		}
 
+		inputFilepath := filepath.Join(inputDir, fileInfo.Name())
+
 		// Open file
-		inputFile, err := os.Open(filepath.Join(inputDirectory, fileInfo.Name()))
+		inputFile, err := os.Open(inputFilepath)
 		if err != nil {
 			return err
+		}
+		// Defer removal of file for execution after it's closed
+		if clean == true {
+			defer os.Remove(inputFilepath)
 		}
 		defer inputFile.Close()
 
@@ -47,7 +53,7 @@ func makeProcessFunc(inputDirectory string, outputDirectory string, silent bool)
 
 		// Transform path "input/img.bmp" into "output/img.png"
 		bmpLastDot := strings.LastIndex(fileInfo.Name(), ".")
-		bmpOutputFilepath := filepath.Join(outputDirectory, fmt.Sprint(fileInfo.Name()[:bmpLastDot], ".png"))
+		bmpOutputFilepath := filepath.Join(outputDir, fmt.Sprint(fileInfo.Name()[:bmpLastDot], ".png"))
 
 		// Create output file
 		outputFile, err := os.Create(bmpOutputFilepath)
@@ -85,6 +91,7 @@ func main() {
 	inputDirFlag := flag.String("input", ".", "Path to process BMP files in")
 	outputDirFlag := flag.String("output", ".", "Path to write JPEG files out")
 	silent := flag.Bool("silent", false, "Don't print anything to stdout")
+	clean := flag.Bool("clean", false, "Delete BMPs after processing")
 	flag.Parse()
 
 	// Timing
@@ -94,9 +101,9 @@ func main() {
 	inputDir := trimPath(*inputDirFlag)
 	outputDir := trimPath(*outputDirFlag)
 
-	processFile := makeProcessFunc(inputDir, outputDir, *silent)
+	processFile := makeProcessFunc(inputDir, outputDir, *silent, *clean)
 
-	// Read files in inputDir and run processFile on each
+	// Try to read directory
 
 	files, err := ioutil.ReadDir(inputDir)
 	if err != nil {
@@ -106,6 +113,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(len(files))
 
+	// processFile for each file in inputDir
 	for _, file := range files {
 		go func(f os.FileInfo) {
 			defer wg.Done()
