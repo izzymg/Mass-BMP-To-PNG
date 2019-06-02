@@ -97,10 +97,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	processed := 0
 	for _, file := range files {
 		err := processFile(file)
 		if err != nil {
 			panic(err)
 		}
+		processed++
+	}
+	if *silent == false {
+		fmt.Printf("Processed %d images\n", processed)
 	}
 }
