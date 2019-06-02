@@ -30,7 +30,7 @@ func makeWalkFunc(outputDirectory string) filepath.WalkFunc {
 		}
 
 		// Open file
-		fmt.Printf("Opening %s\n", inputFilepath)
+		fmt.Printf("Decoding %s\n", inputFilepath)
 		inputFile, err := os.Open(inputFilepath)
 		if err != nil {
 			return err
@@ -38,7 +38,6 @@ func makeWalkFunc(outputDirectory string) filepath.WalkFunc {
 		defer inputFile.Close()
 
 		// Decode BMP into an image
-		fmt.Println("Decoding")
 		bmpImage, err := bmp.Decode(inputFile)
 		if err != nil {
 			return err
