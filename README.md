@@ -8,4 +8,6 @@ Usage:
 
 Options:
 
-* `--silent` Prevents stdout
+* `--silent"` Prevents stdout
+* `--input="path"` Directory to process bmps in. Defaults to execution directory.
+* `--output="path"` Directory to output pngs to. Defaults to execution directory.
