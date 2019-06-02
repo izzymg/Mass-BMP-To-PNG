@@ -5,33 +5,30 @@ import (
 	"fmt"
 	"golang.org/x/image/bmp"
 	"image/png"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-// makeWalkFunc creates a WalkFunc that attempts to convert any BMP files it finds
+// makeProcessFunc creates a function that attempts to convert any BMP files it finds
 // into PNGs and write them into outputDirectory
-func makeWalkFunc(outputDirectory string) filepath.WalkFunc {
-	return func(inputFilepath string, inputFileInfo os.FileInfo, err error) error {
-
-		if err != nil {
-			return err
-		}
+func makeProcessFunc(inputDirectory string, outputDirectory string) func(fileInfo os.FileInfo) error {
+	return func(fileInfo os.FileInfo) error {
 
 		// Skip directories
-		if inputFileInfo.IsDir() == true {
+		if fileInfo.IsDir() == true {
 			return nil
 		}
 
 		// Skip files not containing bmp extension
-		if filepath.Ext(inputFileInfo.Name()) != ".bmp" {
+		if filepath.Ext(fileInfo.Name()) != ".bmp" {
 			return nil
 		}
 
 		// Open file
-		fmt.Printf("Decoding %s\n", inputFilepath)
-		inputFile, err := os.Open(inputFilepath)
+		fmt.Printf("Processing %s\n", fileInfo.Name())
+		inputFile, err := os.Open(filepath.Join(inputDirectory, fileInfo.Name()))
 		if err != nil {
 			return err
 		}
@@ -44,12 +41,10 @@ func makeWalkFunc(outputDirectory string) filepath.WalkFunc {
 		}
 
 		// Transform path "input/img.bmp" into "output/img.png"
-		bmpBasename := filepath.Base(inputFilepath)
-		bmpLastDot := strings.LastIndex(bmpBasename, ".")
-		bmpOutputFilepath := filepath.Join(outputDirectory, fmt.Sprint(bmpBasename[:bmpLastDot], ".png"))
+		bmpLastDot := strings.LastIndex(fileInfo.Name(), ".")
+		bmpOutputFilepath := filepath.Join(outputDirectory, fmt.Sprint(fileInfo.Name()[:bmpLastDot], ".png"))
 
 		// Create output file
-		fmt.Printf("Creating %s\n", bmpOutputFilepath)
 		outputFile, err := os.Create(bmpOutputFilepath)
 		if err != nil {
 			return err
@@ -65,8 +60,8 @@ func makeWalkFunc(outputDirectory string) filepath.WalkFunc {
 	}
 }
 
-// trimInputPath cleans p and removes excess whitespace and quote characters
-func trimInputPath(p string) string {
+// trimPath cleans p and removes excess whitespace and quote characters
+func trimPath(p string) string {
 	s := filepath.Clean(strings.TrimSpace(p))
 	if len(s) < 2 {
 		return s
@@ -80,14 +75,28 @@ func trimInputPath(p string) string {
 }
 
 func main() {
-	inputDirectory := flag.String("input", ".", "Path to process BMP files in")
-	outputDirectory := flag.String("output", ".", "Path to write JPEG files out")
+
+	// Parse flags
+	inputDirFlag := flag.String("input", ".", "Path to process BMP files in")
+	outputDirFlag := flag.String("output", ".", "Path to write JPEG files out")
 	flag.Parse()
 
-	walkFunc := makeWalkFunc(trimInputPath(*inputDirectory))
+	// Trim
+	inputDir := trimPath(*inputDirFlag)
+	outputDir := trimPath(*outputDirFlag)
 
-	err := filepath.Walk(trimInputPath(*outputDirectory), walkFunc)
+	processFile := makeProcessFunc(inputDir, outputDir)
+
+	// Read files in inputDir and run processFile on each
+
+	files, err := ioutil.ReadDir(inputDir)
 	if err != nil {
 		panic(err)
+	}
+	for _, file := range files {
+		err := processFile(file)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
