@@ -10,7 +10,7 @@ Options:
 
 ## Usage
 
-You can download the compiled binaries in the releases section `https://github.com/izzymg/Mass-BMP-To-PNG/releases`
+You can download the compiled binaries in the [releases](https://github.com/izzymg/Mass-BMP-To-PNG/releases) section
 
 For windows, you can right click the exe, create a shortcut, open its properties add the run flags to the "Target" section
 
