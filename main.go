@@ -110,17 +110,21 @@ func main() {
 		panic(err)
 	}
 
+	// Setup waitgroup, and semaphore to limit concurrency
 	var wg sync.WaitGroup
 	wg.Add(len(files))
+	var sem = make(chan int, 5)
 
 	// processFile for each file in inputDir
 	for _, file := range files {
+		sem <- 1
 		go func(f os.FileInfo) {
 			defer wg.Done()
 			err := processFile(f)
 			if err != nil {
 				panic(err)
 			}
+			<-sem
 		}(file)
 	}
 
