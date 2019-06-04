@@ -92,7 +92,12 @@ func main() {
 	outputDirFlag := flag.String("output", ".", "Path to write JPEG files out")
 	silent := flag.Bool("silent", false, "Don't print anything to stdout")
 	clean := flag.Bool("clean", false, "Delete BMPs after processing")
+	concurrency := flag.Int("c", 5, "Number of concurrent operations")
 	flag.Parse()
+
+	if *concurrency < 1 {
+		*concurrency = 1
+	}
 
 	// Timing
 	start := time.Now()
@@ -113,7 +118,7 @@ func main() {
 	// Setup waitgroup, and semaphore to limit concurrency
 	var wg sync.WaitGroup
 	wg.Add(len(files))
-	var sem = make(chan int, 5)
+	var sem = make(chan int, *concurrency)
 
 	// processFile for each file in inputDir
 	for _, file := range files {
