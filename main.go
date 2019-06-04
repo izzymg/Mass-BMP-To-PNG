@@ -32,38 +32,37 @@ func makeProcessFunc(outputDir string, silent bool, clean bool) func(fileInfo os
 			fmt.Printf("Processing \"%s\"\n", fileInfo.Name())
 		}
 
-		inputFilepath := fileInfo.Name()
-
 		// Open file
-		inputFile, err := os.Open(inputFilepath)
+		openedFile, err := os.Open(fileInfo.Name())
 		if err != nil {
 			return err
 		}
+
 		// Defer removal of file for execution after it's closed
 		if clean == true {
-			defer os.Remove(inputFilepath)
+			defer os.Remove(fileInfo.Name())
 		}
-		defer inputFile.Close()
+		defer openedFile.Close()
 
-		// Decode BMP into an image
-		bmpImage, err := bmp.Decode(inputFile)
+		// Decode BMP into an image.Image
+		bmpImage, err := bmp.Decode(openedFile)
 		if err != nil {
 			return err
 		}
 
 		// Transform path "input/img.bmp" into "output/img.png"
-		bmpLastDot := strings.LastIndex(fileInfo.Name(), ".")
-		bmpOutputFilepath := filepath.Join(outputDir, fmt.Sprint(fileInfo.Name()[:bmpLastDot], ".png"))
+		fileLastExt := strings.LastIndex(fileInfo.Name(), ".")
+		outputFp := filepath.Join(outputDir, fmt.Sprint(fileInfo.Name()[:fileLastExt], ".png"))
 
 		// Create output file
-		outputFile, err := os.Create(bmpOutputFilepath)
+		output, err := os.Create(outputFp)
 		if err != nil {
 			return err
 		}
-		defer outputFile.Close()
+		defer output.Close()
 
 		// Encode BMP into PNG file
-		err = png.Encode(outputFile, bmpImage)
+		err = png.Encode(output, bmpImage)
 		if err != nil {
 			return err
 		}
@@ -73,12 +72,16 @@ func makeProcessFunc(outputDir string, silent bool, clean bool) func(fileInfo os
 
 // trimPath cleans p and removes excess whitespace and quote characters
 func trimPath(p string) string {
+
 	s := filepath.Clean(strings.TrimSpace(p))
 	if len(s) < 2 {
 		return s
 	}
+
 	firstChar := s[0]
 	lastChar := s[len(s)-1]
+
+	// Return string without its first and last characters if it's enclosed in "" or ''
 	if (firstChar == '"' && lastChar == '"') || (firstChar == '\'' && lastChar == '\'') {
 		return s[1 : len(s)-1]
 	}
@@ -109,12 +112,12 @@ func main() {
 	processFile := makeProcessFunc(outputDir, *silent, *clean)
 
 	// Try to read directory
-
 	files, err := ioutil.ReadDir(inputDir)
 	if err != nil {
 		panic(err)
 	}
 
+	// Change to input directory
 	err = os.Chdir(inputDir)
 	if err != nil {
 		panic(err)
