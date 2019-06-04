@@ -4,9 +4,10 @@ Converts all BMPs in the given directory to PNGs
 
 Options:
 
-* `--clean` Remove BMPs after processing.
 * `--input="path"` Directory to process bmps in. Defaults to execution directory.
 * `--output="path"` Directory to output pngs to. Defaults to execution directory.
+* `--help`
+* `--clean` Remove BMPs after processing.
 * `--silent` Prevents stdout
 
 ## Usage

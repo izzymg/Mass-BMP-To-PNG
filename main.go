@@ -88,11 +88,11 @@ func trimPath(p string) string {
 func main() {
 
 	// Parse flags
-	inputDirFlag := flag.String("input", ".", "Path to process BMP files in")
-	outputDirFlag := flag.String("output", ".", "Path to write JPEG files out")
 	silent := flag.Bool("silent", false, "Don't print anything to stdout")
 	clean := flag.Bool("clean", false, "Delete BMPs after processing")
 	concurrency := flag.Int("c", 5, "Number of concurrent operations")
+	inputDirFlag := flag.String("input", ".", "Path to process BMP files in")
+	outputDirFlag := flag.String("output", ".", "Path to write JPEG files out")
 	flag.Parse()
 
 	if *concurrency < 1 {
