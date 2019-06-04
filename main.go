@@ -17,7 +17,6 @@ import (
 // into PNGs and write them into outputDir
 func makeProcessFunc(outputDir string, silent bool, clean bool) func(fileInfo os.FileInfo) error {
 	return func(fileInfo os.FileInfo) error {
-
 		// Skip directories
 		if fileInfo.IsDir() == true {
 			return nil
@@ -74,7 +73,6 @@ func makeProcessFunc(outputDir string, silent bool, clean bool) func(fileInfo os
 
 // trimPath cleans p and removes excess whitespace and quote characters
 func trimPath(p string) string {
-
 	s := filepath.Clean(strings.TrimSpace(p))
 	if len(s) < 2 {
 		return s
@@ -91,7 +89,6 @@ func trimPath(p string) string {
 }
 
 func main() {
-
 	// Parse flags
 	silent := flag.Bool("silent", false, "Don't print anything to stdout")
 	clean := flag.Bool("clean", false, "Delete BMPs after processing")
