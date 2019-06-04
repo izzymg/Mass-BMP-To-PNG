@@ -4,8 +4,8 @@ Converts all BMPs in the given directory to PNGs
 
 Options:
 
-* `--input="path"` Directory to process bmps in. Defaults to execution directory.
-* `--output="path"` Directory to output pngs to. Defaults to execution directory.
+* `--input="path"` Directory to process bmps in. Defaults to current directory.
+* `--output="path"` Directory to output pngs to. Defaults to input directory.
 * `--help`
 * `--clean` Remove BMPs after processing.
 * `--silent` Prevents stdout
