@@ -15,7 +15,7 @@ import (
 
 // makeProcessFunc creates a function that attempts to convert any BMP files it finds
 // into PNGs and write them into outputDir
-func makeProcessFunc(inputDir string, outputDir string, silent bool, clean bool) func(fileInfo os.FileInfo) error {
+func makeProcessFunc(outputDir string, silent bool, clean bool) func(fileInfo os.FileInfo) error {
 	return func(fileInfo os.FileInfo) error {
 
 		// Skip directories
@@ -32,7 +32,7 @@ func makeProcessFunc(inputDir string, outputDir string, silent bool, clean bool)
 			fmt.Printf("Processing \"%s\"\n", fileInfo.Name())
 		}
 
-		inputFilepath := filepath.Join(inputDir, fileInfo.Name())
+		inputFilepath := fileInfo.Name()
 
 		// Open file
 		inputFile, err := os.Open(inputFilepath)
@@ -106,11 +106,16 @@ func main() {
 	inputDir := trimPath(*inputDirFlag)
 	outputDir := trimPath(*outputDirFlag)
 
-	processFile := makeProcessFunc(inputDir, outputDir, *silent, *clean)
+	processFile := makeProcessFunc(outputDir, *silent, *clean)
 
 	// Try to read directory
 
 	files, err := ioutil.ReadDir(inputDir)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.Chdir(inputDir)
 	if err != nil {
 		panic(err)
 	}
