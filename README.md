@@ -6,9 +6,10 @@ Options:
 
 * `--input="path"` Directory to process bmps in. Defaults to current directory.
 * `--output="path"` Directory to output pngs to. Defaults to input directory.
-* `--help`
 * `--clean` Remove BMPs after processing.
-* `--silent` Prevents stdout
+* `--c=5` Sets number of concurrent operations to 5.
+* `--silent` Prevents stdout.
+* `--help`
 
 ## Usage
 
