@@ -23,24 +23,26 @@ func makeProcessFunc(outputDir string, silent bool, clean bool) func(fileInfo os
 			return nil
 		}
 
+		filename := fileInfo.Name()
+
 		// Skip files not containing bmp extension
-		if filepath.Ext(fileInfo.Name()) != ".bmp" {
+		if filepath.Ext(filename) != ".bmp" {
 			return nil
 		}
 
 		if silent == false {
-			fmt.Printf("Processing \"%s\"\n", fileInfo.Name())
+			fmt.Printf("Processing \"%s\"\n", filename)
 		}
 
 		// Open file
-		openedFile, err := os.Open(fileInfo.Name())
+		openedFile, err := os.Open(filename)
 		if err != nil {
 			return err
 		}
 
 		// Defer removal of file for execution after it's closed
 		if clean == true {
-			defer os.Remove(fileInfo.Name())
+			defer os.Remove(filename)
 		}
 		defer openedFile.Close()
 
@@ -51,8 +53,8 @@ func makeProcessFunc(outputDir string, silent bool, clean bool) func(fileInfo os
 		}
 
 		// Transform path "input/img.bmp" into "output/img.png"
-		fileLastExt := strings.LastIndex(fileInfo.Name(), ".")
-		outputFp := filepath.Join(outputDir, fmt.Sprint(fileInfo.Name()[:fileLastExt], ".png"))
+		fileLastExt := strings.LastIndex(filename, ".")
+		outputFp := filepath.Join(outputDir, fmt.Sprint(filename[:fileLastExt], ".png"))
 
 		// Create output file
 		output, err := os.Create(outputFp)
